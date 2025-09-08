@@ -11,20 +11,35 @@
         <style>
             /* Style for the custom loading screen */
             #loader {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: #1a1a1a;
-                color: white;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                font-family: monospace;
-                font-size: 20px;
-                z-index: 9999;
+                position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+                background-color: #1a1a1a; color: white; z-index: 9999;
+                display: flex; justify-content: center; align-items: center;
+                font-family: monospace; font-size: 20px;
             }
+
+            /* NEW: Styles for the Tips Box */
+            #tips-container {
+                position: absolute; bottom: 20px; left: 50%;
+                transform: translateX(-50%);
+                width: 85%; max-width: 450px;
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 15px; border-radius: 12px;
+                text-align: center; font-family: sans-serif;
+                z-index: 10;
+                display: none; /* Initially hidden */
+                cursor: pointer;
+                -webkit-user-select: none; /* Disable text selection */
+                user-select: none;
+            }
+            #tip-text { font-size: 16px; margin-bottom: 12px; }
+            #tip-progress .dot {
+                height: 8px; width: 8px; margin: 0 4px;
+                background-color: #bbb;
+                border-radius: 50%;
+                display: inline-block;
+            }
+            #tip-progress .dot.active { background-color: #ffffff; }
         </style>
     </head>
 
@@ -41,25 +56,17 @@
             gesture-detector
         >
             <a-assets>
-                <a-asset-item
-                    id="animated-asset"
-                    src="assets/asset.gltf"
-                ></a-asset-item>
+                <a-asset-item id="animated-asset" src="assets/asset.gltf"></a-asset-item>
             </a-assets>
 
             <a-marker
-                id="animated-marker"
-                type="pattern"
-                preset="custom"
-                url="assets/marker.patt"
-                raycaster="objects: .clickable"
-                emitevents="true"
+                id="animated-marker" type="pattern" preset="custom" url="assets/marker.patt"
+                raycaster="objects: .clickable" emitevents="true"
                 cursor="fuse: false; rayOrigin: mouse;"
-                id="markerA"
             >
                 <a-entity
                     id="bowser-model"
-                    scale="0.9823006608916783 0.9823006608916783 0.9823006608916783"
+                    scale="0.98 0.98 0.98"
                     animation-mixer="loop: repeat"
                     gltf-model="#animated-asset"
                     class="clickable"
@@ -70,13 +77,58 @@
             <a-entity camera></a-entity>
         </a-scene>
 
-        <script>
-            const scene = document.querySelector('#scene');
-            const loader = document.querySelector('#loader');
+        <div id="tips-container">
+            <p id="tip-text">Tip will appear here.</p>
+            <div id="tip-progress"></div>
+        </div>
 
-            scene.addEventListener('loaded', function () {
-                // Hide the loading screen
-                loader.style.display = 'none';
+        <script>
+            // --- Existing Loader Logic ---
+            const sceneEl = document.querySelector('#scene');
+            const loaderEl = document.querySelector('#loader');
+            sceneEl.addEventListener('loaded', () => loaderEl.style.display = 'none');
+
+            // --- NEW: Tips Box Logic ---
+            const tips = [
+                "Keep soil moist, not soggy.",
+                "Avoid direct harsh sunlight.",
+                "Use a spray bottle for gentle watering.",
+                "Keep sprouts away from strong winds or fans.",
+                "Support stems if they start bending.",
+                "Talk to your plants — they respond! 🌱"
+            ];
+
+            let currentTipIndex = 0;
+            const tipsContainer = document.querySelector('#tips-container');
+            const tipText = document.querySelector('#tip-text');
+            const tipProgress = document.querySelector('#tip-progress');
+
+            // Function to update the displayed tip and progress dots
+            function updateTip() {
+                tipText.textContent = tips[currentTipIndex];
+                const dots = tipProgress.children;
+                for (let i = 0; i < dots.length; i++) {
+                    dots[i].classList.toggle('active', i === currentTipIndex);
+                }
+            }
+
+            // Create progress dots based on the number of tips
+            tips.forEach(() => {
+                const dot = document.createElement('span');
+                dot.className = 'dot';
+                tipProgress.appendChild(dot);
+            });
+
+            // Show the tips box when the scene is ready
+            sceneEl.addEventListener('rendererstart', () => {
+                tipsContainer.style.display = 'block';
+                updateTip(); // Show the first tip
+            });
+            
+            // Change tip when the box is clicked
+            tipsContainer.addEventListener('click', () => {
+                currentTipIndex = (currentTipIndex + 1) % tips.length; // Loop through tips
+                updateTip();
             });
         </script>
     </body>
