@@ -17,7 +17,7 @@
                 font-family: monospace; font-size: 20px;
             }
 
-            /* NEW: Styles for the Tips Box */
+            /* Styles for the Tips Box */
             #tips-container {
                 position: absolute; bottom: 20px; left: 50%;
                 transform: translateX(-50%);
@@ -88,7 +88,7 @@
             const loaderEl = document.querySelector('#loader');
             sceneEl.addEventListener('loaded', () => loaderEl.style.display = 'none');
 
-            // --- NEW: Tips Box Logic ---
+            // --- Tips Box Logic ---
             const tips = [
                 "Keep soil moist, not soggy.",
                 "Avoid direct harsh sunlight.",
@@ -119,8 +119,9 @@
                 tipProgress.appendChild(dot);
             });
 
-            // Show the tips box when the scene is ready
-            sceneEl.addEventListener('rendererstart', () => {
+            // **THE FIX IS HERE**
+            // Show the tips box as soon as the camera feed starts
+            sceneEl.addEventListener('arjs-video-loaded', () => {
                 tipsContainer.style.display = 'block';
                 updateTip(); // Show the first tip
             });
